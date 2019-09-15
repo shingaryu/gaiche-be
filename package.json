@@ -1,0 +1,20 @@
+{
+  "name": "eurkakeibo",
+  "version": "1.0.0",
+  "description": "Local test project for EURKakeibo backend. Its sources are intended for migrating to AWS lambda function.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Koki Matsuzawa",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.528.0",
+    "busboy": "^0.3.1",
+    "csv-parse": "^4.4.5",
+    "express": "^4.17.1",
+    "parse-multipart": "^1.0.4",
+    "uuid": "^3.3.3"
+  }
+}
