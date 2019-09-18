@@ -19,4 +19,11 @@ router.post('/csv', async (req, res) => {
   res.send('postRecordsFromCsv finished');
 });
 
+router.get('/analysis/time-series-balance', async (req, res) => {
+  // req: currency and initial amount
+  const timeSeries = await recordService.getTimeSeriesBalance('YEN', 0);
+  console.log(timeSeries);
+  res.send(timeSeries);
+});
+
 module.exports = router;

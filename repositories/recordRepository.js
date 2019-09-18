@@ -29,3 +29,13 @@ module.exports.batchWrite = async (ddbItems) => {
     }
   }
 }
+
+module.exports.scan = async (filterExpression, expressionAttributeValues) => {
+  const params = {
+    TableName : 'EURKakeibo-Records',
+    FilterExpression : filterExpression,
+    ExpressionAttributeValues : expressionAttributeValues
+  };
+
+  return ddb.scan(params).promise();  
+}
