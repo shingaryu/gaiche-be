@@ -1,7 +1,7 @@
 {
   "name": "eurkakeibo",
   "version": "1.0.0",
-  "description": "Local test project for EURKakeibo backend. Its sources are intended for migrating to AWS lambda function.",
+  "description": "Backend application of EURKakeibo. It serves many APIs to manage users's balance, and data is stored in DynamoDB in AWS.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
