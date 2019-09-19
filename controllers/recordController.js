@@ -21,7 +21,15 @@ router.post('/csv', async (req, res) => {
 
 router.get('/analysis/time-series-balance', async (req, res) => {
   // req: currency and initial amount
-  const timeSeries = await recordService.getTimeSeriesBalance('YEN', 0);
+  const timeSeries = await recordService.getTimeSeriesBalance('EUR', 0);
+  console.log(timeSeries);
+  res.send(timeSeries);
+});
+
+router.get('/analysis/time-series-balance-all', async (req, res) => {
+  // req: base currency and initial amount
+  const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies('YEN', 0);
+  // const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies(req.body.baseCurrency, req.body.initialAmount);
   console.log(timeSeries);
   res.send(timeSeries);
 });

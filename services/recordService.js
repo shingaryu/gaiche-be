@@ -1,6 +1,7 @@
 const csvParser = require('./utils/csvStringToArrays');
 const recordRepository = require('../repositories/recordRepository');
 const uuidv4 = require('uuid/v4');
+const exchangeRates = require('./utils/exchangeRates');
 
 module.exports.postRecordsFromCsv = async (csvType, csvText) => {
   let kakeiboRecords = await csvParser.parseStringToArrays(csvText);
@@ -131,4 +132,66 @@ module.exports.getTimeSeriesBalance = async (currency, initialAmount) => {
   } catch (e) {
     console.log(e);
   }
+}
+
+module.exports.getTimeSeriesBalanceFromAllCurrencies = async (baseCurrency, initialAmount) => {
+  const currencies = ['YEN', 'USD', 'EUR']; // temporarily
+  try {
+    let allItemsAfterConverted = [];
+    for (let currency of currencies) {
+      const data = await recordRepository.scan('currency = :target_currency', {':target_currency' : currency});
+      const convertedItems = data.Items.map(item => {
+        let convertedItem = {...item};
+        convertedItem.amount = convertedItem.amount * exchangeRates[baseCurrency][currency];
+        convertedItem.currency = baseCurrency;
+        return convertedItem;
+      })
+      console.log(`currency ${currency}, items: ${convertedItems.length}`);
+      allItemsAfterConverted = allItemsAfterConverted.concat(convertedItems);
+    }    
+
+    console.log(allItemsAfterConverted.length);
+    console.log(allItemsAfterConverted);
+    // const items = data.Items;
+    const items = allItemsAfterConverted;
+    items.sort((a, b) => {
+      const aDate = Date.parse(a.date);
+      const bDate = Date.parse(b.date);
+      if (aDate < bDate) {
+        return -1;
+      } else if (bDate < aDate) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    const timeSeries = [];
+    let currentDate = null;
+    let currentBalance = initialAmount;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (currentDate !== item.date && i !== 0) {
+        timeSeries.push({date: currentDate, balance: currentBalance});
+      }
+
+      currentDate = item.date;
+      if (item.transactionCategory === 0) { // payment
+        currentBalance -= item.amount;
+      } else if (item.transactionCategory === 1) { // income
+        currentBalance += item.amount
+      } else { // transfer
+        currentBalance += 0; // not changed totally
+      }
+    }
+
+    if (currentDate) {
+      timeSeries.push({date: currentDate, balance: currentBalance});
+    }
+
+    return timeSeries;
+  } catch (e) {
+    console.log(e);
+  }
+
 }
