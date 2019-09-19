@@ -2,15 +2,21 @@ const csvParser = require('./utils/csvStringToArrays');
 const recordRepository = require('../repositories/recordRepository');
 const uuidv4 = require('uuid/v4');
 
-module.exports.postRecordsFromCsv = async (file) => {
-  // file is supporsed to be plain text after decoded from Base64
-  let kakeiboRecords = await csvParser.parseStringToArrays(file);
+module.exports.postRecordsFromCsv = async (csvType, csvText) => {
+  let kakeiboRecords = await csvParser.parseStringToArrays(csvText);
   console.log(kakeiboRecords);
 
   kakeiboRecords = kakeiboRecords.slice(1); // skip headler row
-  // const ddbItems = intesaRecordsToDdbItems(kakeiboRecords);
-  const ddbItems = zaimRecordsToDdbItems(kakeiboRecords);
-  recordRepository.batchWrite(ddbItems);
+  let ddbItems = [];
+  if (csvType === 'INTESA') {
+    ddbItems = intesaRecordsToDdbItems(kakeiboRecords);
+  } else if (csvType === 'ZAIM') {
+    ddbItems = zaimRecordsToDdbItems(kakeiboRecords);
+  } else {
+    throw new Error(`csvType ${csvType} is invalid!`);
+  }
+  await recordRepository.batchWrite(ddbItems);
+  return ddbItems;
 }
 
 // each row item will be single dynamoDB item

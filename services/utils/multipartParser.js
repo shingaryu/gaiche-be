@@ -2,6 +2,7 @@
 
 const Busboy = require('busboy');
 
+// workaround for AWS Lambda's weird headers  
 const getContentType = (event) => {
     let contentType = event.headers['content-type']
     if (!contentType){
@@ -10,12 +11,19 @@ const getContentType = (event) => {
     return contentType;
 };
 
-const parser = (event) => new Promise((resolve, reject) => {
-    const busboy = new Busboy({
-        headers: {
-            'content-type': getContentType(event),
-        }
-    });
+module.exports.parseAWSLambdaEvent = (event) => new Promise((resolve, reject) => {
+    const busboy = createBusboy({'content-type': getContentType(event)}, resolve, reject);
+    busboy.write(event.body, event.isBase64Encoded ? 'base64' : 'binary');
+    busboy.end();
+});
+
+module.exports.parseHTTPRequest = (req) => new Promise((resolve, reject) => {
+    const busboy = createBusboy(req.headers, resolve, reject);
+    req.pipe(busboy);
+});
+
+function createBusboy(headers, resolve, reject) {
+    const busboy = new Busboy({ headers });
 
     const result = {};
 
@@ -35,11 +43,7 @@ const parser = (event) => new Promise((resolve, reject) => {
     });
 
     busboy.on('error', error => reject(`Parse error: ${error}`));
-    // event.body = result;
     busboy.on('finish', () => resolve(result));
 
-    busboy.write(event.body, event.isBase64Encoded ? 'base64' : 'binary');
-    busboy.end();
-});
-
-module.exports.parse = parser;
+    return busboy;
+}
