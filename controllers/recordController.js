@@ -6,7 +6,6 @@ const parser = require('../services/utils/multipartParser');
 const event = require('../services/utils/awsLambdaEventMock').zaimCsvEventUtf8;
 
 router.post('/csv', async (req, res) => {
-  // currently, only mock object is acceptable!
   const parsedEvent = await parser.parseHTTPRequest(req);
   // console.log('multipart parser then:');
   console.log(parsedEvent);
@@ -20,17 +19,13 @@ router.post('/csv', async (req, res) => {
 });
 
 router.get('/analysis/time-series-balance', async (req, res) => {
-  // req: currency and initial amount
-  const timeSeries = await recordService.getTimeSeriesBalance('EUR', 0);
-  console.log(timeSeries);
+  const timeSeries = await recordService.getTimeSeriesBalance(req.query.currency, req.query.initialAmount);
   res.send(timeSeries);
 });
 
 router.get('/analysis/time-series-balance-all', async (req, res) => {
   // req: base currency and initial amount
-  const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies('YEN', 0);
-  // const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies(req.body.baseCurrency, req.body.initialAmount);
-  console.log(timeSeries);
+  const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies(req.query.baseCurrency, req.query.initialAmount);
   res.send(timeSeries);
 });
 
