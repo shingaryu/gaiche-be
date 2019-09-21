@@ -19,13 +19,13 @@ router.post('/csv', async (req, res) => {
 });
 
 router.get('/analysis/time-series-balance', async (req, res) => {
-  const timeSeries = await recordService.getTimeSeriesBalance(req.query.currency, req.query.initialAmount);
+  const timeSeries = await recordService.getTimeSeriesBalance(req.query.currency, parseFloat(req.query.initialAmount));
   res.send(timeSeries);
 });
 
 router.get('/analysis/time-series-balance-all', async (req, res) => {
   // req: base currency and initial amount
-  const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies(req.query.baseCurrency, req.query.initialAmount);
+  const timeSeries = await recordService.getTimeSeriesBalanceFromAllCurrencies(req.query.baseCurrency, parseFloat(req.query.initialAmount));
   res.send(timeSeries);
 });
 

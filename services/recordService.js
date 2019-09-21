@@ -25,7 +25,7 @@ function intesaRecordsToDdbItems(records) {
   ddbItems = [];
 
   records.forEach(record => {
-    const amount = parseFloat(record[7]);
+    const amount = parseFloat(record[7].replace(',', ''));
 
     const item = {
       id: uuidv4(),
