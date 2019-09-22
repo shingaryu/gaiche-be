@@ -1,7 +1,7 @@
 {
-  "name": "eurkakeibo",
-  "version": "1.0.0",
-  "description": "Backend application of EURKakeibo. It serves many APIs to manage users's balance, and data is stored in DynamoDB in AWS.",
+  "name": "gaiche-be",
+  "version": "0.1.0",
+  "description": "Backend application of Gaiche. It serves many APIs to manage users's balance which is stored in DynamoDB.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
