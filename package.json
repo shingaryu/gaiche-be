@@ -1,6 +1,9 @@
 {
   "name": "gaiche-be",
   "version": "0.1.0",
+  "engines": {
+    "node": "10.16.3"
+  },
   "description": "Backend application of Gaiche. It serves many APIs to manage users's balance which is stored in DynamoDB.",
   "main": "app.js",
   "scripts": {
@@ -13,7 +16,9 @@
     "aws-sdk": "^2.528.0",
     "busboy": "^0.3.1",
     "csv-parse": "^4.4.5",
+    "exceljs": "^3.5.0",
     "express": "^4.17.1",
+    "moment": "^2.24.0",
     "parse-multipart": "^1.0.4",
     "uuid": "^3.3.3"
   }

@@ -18,6 +18,13 @@ router.post('/csv', async (req, res) => {
   res.send(items);
 });
 
+router.post('/xlsx', async (req, res) => {
+  const parsedEvent = await parser.parseHTTPRequest(req);
+  const buff = Buffer.from(parsedEvent.file, 'base64');
+  const items = await recordService.postRecordsFromXlsx(buff);
+  res.send(items);
+});
+
 router.get('/analysis/time-series-balance', async (req, res) => {
   const timeSeries = await recordService.getTimeSeriesBalance(req.query.currency, parseFloat(req.query.initialAmount));
   res.send(timeSeries);

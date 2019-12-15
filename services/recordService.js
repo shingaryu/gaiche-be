@@ -2,6 +2,8 @@ const csvParser = require('./utils/csvStringToArrays');
 const recordRepository = require('../repositories/recordRepository');
 const uuidv4 = require('uuid/v4');
 const exchangeRates = require('./utils/exchangeRates');
+const excelJS = require('exceljs');
+const moment = require('moment');
 
 module.exports.postRecordsFromCsv = async (csvType, csvText) => {
   let kakeiboRecords = await csvParser.parseStringToArrays(csvText);
@@ -19,6 +21,47 @@ module.exports.postRecordsFromCsv = async (csvType, csvText) => {
   await recordRepository.batchWrite(ddbItems);
   return ddbItems;
 }
+
+module.exports.postRecordsFromXlsx = async (xlsxBuff) => {
+  const workbook = new excelJS.Workbook();
+  workbook.xlsx.load(xlsxBuff).then(async () => {
+    const worksheet = workbook.getWorksheet(1);
+
+    if (worksheet.getCell('A19').value !== 'Data' || worksheet.getRow(19).values.length !== 9) {
+      throw new Error(`structure of the sheet seems to be different from that of usual INTESA format`);
+    }
+    worksheet.spliceRows(0, 18);
+
+    let kakeiboRecords = [];
+    worksheet.eachRow((row, rowNumber) => {
+      const record = [];
+      row.eachCell((cell, colNumber) => {
+        if (colNumber == 0) {
+          // always null, real data starts at row[1]
+          return;
+        }
+        if (cell.type == excelJS.ValueType.Date) {
+          record.push(moment(cell.value).format('YYYY/M/D'));
+        } else if (cell.type == excelJS.ValueType.Number) {
+          record.push(cell.value.toString(10));
+        } else {
+          record.push(cell.value);
+        }
+      })
+      if (record.length > 0) {
+        kakeiboRecords.push(record);
+      }
+    });
+
+    console.log(kakeiboRecords);
+
+    kakeiboRecords = kakeiboRecords.slice(1); // skip headler row
+    let ddbItems = [];
+    ddbItems = intesaRecordsToDdbItems(kakeiboRecords);
+    await recordRepository.batchWrite(ddbItems);
+    return ddbItems;
+  });
+};
 
 // each row item will be single dynamoDB item
 function intesaRecordsToDdbItems(records) {
