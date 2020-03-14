@@ -15,7 +15,7 @@
   "dependencies": {
     "aws-sdk": "^2.528.0",
     "busboy": "^0.3.1",
-    "csv-parse": "^4.4.5",
+    "csv-parse": "^4.4.6",
     "exceljs": "^3.5.0",
     "express": "^4.17.1",
     "moment": "^2.24.0",
