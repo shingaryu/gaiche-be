@@ -1,4 +1,7 @@
 const express = require('express');
+const recordsController = require('./controllers/recordController');
+const userController = require('./controllers/userController');
+
 const app = express();
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -10,7 +13,6 @@ app.use(function(req, res, next) {
   next();
 });
 
-const records = require('./controllers/recordController');
 
 app.get('/', function(req, res) {
   res.send('Welcome to Gaiche!');
@@ -25,4 +27,5 @@ app.listen(8000, function() {
   console.log('Example app listening on port 8000!');
 });
 
-app.use('/records', records);
+app.use('/records', recordsController);
+app.use('/users', userController);
