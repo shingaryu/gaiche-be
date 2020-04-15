@@ -7,3 +7,14 @@ module.exports.getUser = async (userId) => {
   }
   return data.Item;
 }
+
+module.exports.getUsers = async (query) => {
+  const filterExpression = Object.keys(query).map(key => (`${key} = :target_${key}`)).join(' and ');
+  const expressionAttributeValues = {};
+  Object.keys(query).forEach(key => {
+    expressionAttributeValues[`:target_${key}`] = query[key];
+  });
+
+  const data = await userRepository.scan(filterExpression, expressionAttributeValues);
+  return data.Items;
+}

@@ -7,4 +7,9 @@ router.get('/:userId', async (req, res) => {
   res.send(user);
 });
 
+router.get('/', async (req, res) => {
+  const users = await userService.getUsers(req.query);
+  res.send(users);
+});
+
 module.exports = router;
