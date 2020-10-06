@@ -1,3 +1,6 @@
+import Record from "../models/Record";
+import TimeSeriesBalance from "../models/TimeSeriesBalance";
+
 const csvParser = require('./utils/csvStringToArrays');
 const recordRepository = require('../repositories/recordRepository');
 const uuidv4 = require('uuid/v4');
@@ -5,7 +8,7 @@ const exchangeRates = require('./utils/exchangeRates');
 const excelJS = require('exceljs');
 const moment = require('moment');
 
-module.exports.postRecordsFromCsv = async (csvType, csvText) => {
+module.exports.postRecordsFromCsv = async (csvType: string, csvText: string) => {
   let kakeiboRecords = await csvParser.parseStringToArrays(csvText);
   console.log(kakeiboRecords);
 
@@ -22,7 +25,7 @@ module.exports.postRecordsFromCsv = async (csvType, csvText) => {
   return ddbItems;
 }
 
-module.exports.postRecordsFromXlsx = async (xlsxBuff) => {
+module.exports.postRecordsFromXlsx = async (xlsxBuff: any) => {
   const workbook = new excelJS.Workbook();
   workbook.xlsx.load(xlsxBuff).then(async () => {
     const worksheet = workbook.getWorksheet(1);
@@ -32,10 +35,10 @@ module.exports.postRecordsFromXlsx = async (xlsxBuff) => {
     }
     worksheet.spliceRows(0, 18);
 
-    let kakeiboRecords = [];
-    worksheet.eachRow((row, rowNumber) => {
-      const record = [];
-      row.eachCell((cell, colNumber) => {
+    let kakeiboRecords: string[][] = [];
+    worksheet.eachRow((row: any, rowNumber: any) => {
+      const record: string[] = [];
+      row.eachCell((cell: any, colNumber: any) => {
         if (colNumber == 0) {
           // always null, real data starts at row[1]
           return;
@@ -64,8 +67,8 @@ module.exports.postRecordsFromXlsx = async (xlsxBuff) => {
 };
 
 // each row item will be single dynamoDB item
-function intesaRecordsToDdbItems(records) {
-  ddbItems = [];
+function intesaRecordsToDdbItems(records: string[][]): Record[] {
+  const ddbItems: Record[] = [];
 
   records.forEach(record => {
     const amount = parseFloat(record[7].replace(',', ''));
@@ -92,8 +95,8 @@ function intesaRecordsToDdbItems(records) {
 }
 
 // each row item will be single dynamoDB item
-function zaimRecordsToDdbItems(records) {
-  ddbItems = [];
+function zaimRecordsToDdbItems(records: string[][]): Record[] {
+  const ddbItems: Record[] = [];
 
   records.forEach(record => {
     let transactionCategory = 0;
@@ -130,7 +133,7 @@ function zaimRecordsToDdbItems(records) {
   return ddbItems;
 }
 
-module.exports.getTimeSeriesBalance = async (currency, initialAmount) => {
+module.exports.getTimeSeriesBalance = async (currency: string, initialAmount: number) => {
   try {
     const data = await recordRepository.scan('currency = :target_currency', {':target_currency' : currency})
 
@@ -142,15 +145,15 @@ module.exports.getTimeSeriesBalance = async (currency, initialAmount) => {
   }
 }
 
-module.exports.getTimeSeriesBalanceFromAllCurrencies = async (baseCurrency, initialAmount) => {
+module.exports.getTimeSeriesBalanceFromAllCurrencies = async (baseCurrency: string, initialAmount: number) => {
   const currencies = ['YEN', 'USD', 'EUR']; // temporarily
   try {
-    let allItemsAfterConverted = [];
-    for (let currency of currencies) {
+    let allItemsAfterConverted: Record[] = [];
+    for (const currency of currencies) {
       // todo: fetch all ddb items at once and filter internally
       const data = await recordRepository.scan('currency = :target_currency', {':target_currency' : currency});
-      const convertedItems = data.Items.map(item => {
-        let convertedItem = {...item};
+      const convertedItems = data.Items.map((item: Record) => {
+        const convertedItem = {...item};
         convertedItem.amount = convertedItem.amount * exchangeRates[baseCurrency][currency];
         convertedItem.currency = baseCurrency;
         return convertedItem;
@@ -168,7 +171,7 @@ module.exports.getTimeSeriesBalanceFromAllCurrencies = async (baseCurrency, init
   }
 }
 
-function timeSeriesFromItems(items, initialAmount) {
+function timeSeriesFromItems(items: Record[], initialAmount: number): TimeSeriesBalance[] {
   items.sort((a, b) => {
     const aDate = Date.parse(a.date);
     const bDate = Date.parse(b.date);
@@ -186,7 +189,7 @@ function timeSeriesFromItems(items, initialAmount) {
   let currentBalance = initialAmount;
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    if (currentDate !== item.date && i !== 0) {
+    if (currentDate && currentDate !== item.date && i !== 0) {
       timeSeries.push({date: currentDate, balance: currentBalance});
     }
 

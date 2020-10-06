@@ -1,15 +1,17 @@
-const AWS = require('aws-sdk');
 AWS.config.update({region:'eu-central-1'});
+import * as AWS from 'aws-sdk';
+import Record from '../models/Record';
+
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-module.exports.batchWrite = async (ddbItems) => {
-  let batchItems = [];
+module.exports.batchWrite = async (ddbItems: Record[]) => {
+  let batchItems: Record[] = [];
   for (let i = 0; i < ddbItems.length; i++) {
     batchItems.push(ddbItems[i]);
     // batch process cannot be run more than 25 items
     if (batchItems.length == 25 || i === ddbItems.length - 1) {
       console.log('batch putItem');
-      var params = {
+      const params = {
         RequestItems: {
           'EURKakeibo-Records': 
           batchItems.map(item => {          
@@ -30,7 +32,7 @@ module.exports.batchWrite = async (ddbItems) => {
   }
 }
 
-module.exports.scan = async (filterExpression, expressionAttributeValues) => {
+module.exports.scan = async (filterExpression: string, expressionAttributeValues: any) => {
   const params = {
     TableName : 'EURKakeibo-Records',
     FilterExpression : filterExpression,
