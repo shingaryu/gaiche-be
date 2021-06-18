@@ -1,6 +1,8 @@
-AWS.config.update({region:'eu-central-1'});
 import * as AWS from 'aws-sdk';
 import Record from '../models/Record';
+
+console.log(`AWS region: ${process.env.AWS_REGION}`)
+AWS.config.update({region:process.env.AWS_REGION, endpoint: process.env.AWS_ENDPOINT} as any);
 
 const ddb = new AWS.DynamoDB.DocumentClient();
 
