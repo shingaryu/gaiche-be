@@ -24,7 +24,7 @@
     "dotenv": "^10.0.0",
     "exceljs": "^3.5.0",
     "express": "^4.17.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "parse-multipart": "^1.0.4",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3",
